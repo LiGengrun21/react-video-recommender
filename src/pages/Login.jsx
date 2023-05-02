@@ -14,6 +14,7 @@ import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import axios from "axios"
 
 
 function Copyright(props) {
@@ -32,13 +33,27 @@ function Copyright(props) {
 const theme = createTheme();
 
 function Login() {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
   const handleSubmit = (event) => {
-    event.preventDefault();
+    event.preventDefault();//防止表单默认行为
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get('email'),
       password: data.get('password'),
     });
+
+    // //登录接口
+    // axios.post('http://localhost:8088/login', { email, password })
+    //   .then(response => {
+    //     // 登录成功，处理响应数据
+    //     console.log(response.data);
+    //   })
+    //   .catch(error => {
+    //     // 登录失败，处理错误信息
+    //     console.error(error);
+    //   });
   };
 
   //身份控制

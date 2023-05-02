@@ -11,6 +11,8 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Alert from '@mui/material/Alert';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 
 function Copyright(props) {
@@ -29,35 +31,73 @@ function Copyright(props) {
 const theme = createTheme();
 
 function Register() {
+  const [password, setPassword] = React.useState("");
+  const [rePassword, setRePassword] = React.useState("");
+  const [passwordsMatch, setPasswordsMatch] = React.useState(true);
+
+  const [email, setEmail] = React.useState("");
+  const [isEmailValid, setIsEmailValid] = React.useState(true);
+
+  const [username, setUsername] = React.useState("");
+  const [input, setInput] = React.useState(true);
+
+  //用于页面跳转
+  const navigate = useNavigate();
+
   const handleSubmit = (event) => {
     event.preventDefault();
+    
+    //获取并打印输入的数据
+    const data = new FormData(event.currentTarget);
+    console.log(data);
 
+    //判断是否4个field全部输入
+    if (username.trim()=='' || email.trim()=='' || password.trim()=='' || rePassword.trim()==''){
+      setInput(false); //存在未输入的field
+      return;
+    }
+    else{
+      setInput(true); //全部输入
+    }
+
+    //判断邮箱是否符合格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(email)){
+      setIsEmailValid(true);
+    }
+    else{
+      setIsEmailValid(false);
+      return;
+    }
+
+    //判断两次密码输入是否相同
     if (password === rePassword) {
       // 密码匹配
       setPasswordsMatch(true);
-      // 在此处执行登录逻辑
     } else {
       // 密码不匹配，显示错误信息
       setPasswordsMatch(false);
+      return;
     }
 
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
+    axios.post("http://localhost:8088/user/register",data).
+      then((response) => {
+        console.log(response.data);
+        navigate("/login")
     });
   };
 
-const [password, setPassword] = React.useState("");
-const [rePassword, setRePassword] = React.useState("");
-const [passwordsMatch, setPasswordsMatch] = React.useState(true);
-
-
   return (
     <div>
-    {!passwordsMatch && (
+      {!input && (
+      <Alert severity="error">请填写全部信息</Alert>
+      )}
+      {!isEmailValid && (
+      <Alert severity="error">邮箱格式错误</Alert>
+      )}
+      {!passwordsMatch && (
       <Alert severity="error">密码不匹配，请重新输入</Alert>
-    )}
+      )}
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -85,6 +125,7 @@ const [passwordsMatch, setPasswordsMatch] = React.useState(true);
               name="email"
               autoComplete="email"
               autoFocus
+              onChange={(event)=>setEmail(event.target.value)}
             />
             <TextField
               margin="normal"
@@ -93,6 +134,7 @@ const [passwordsMatch, setPasswordsMatch] = React.useState(true);
               name="username"
               label="用户名"
               id="username"
+              onChange={(event)=>setUsername(event.target.value)}
             />
             <TextField
               margin="normal"
