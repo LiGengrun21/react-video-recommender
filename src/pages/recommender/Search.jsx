@@ -1,10 +1,10 @@
-import SearchBar from "../../components/SearchBar";
+// import SearchBar from "../../components/SearchBar";
 
 function Search(){
     return(
         <div>
             搜索页面
-            <SearchBar/>
+            {/* <SearchBar/> */}
         </div>
     )
 }
