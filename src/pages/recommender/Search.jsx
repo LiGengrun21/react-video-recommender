@@ -1,10 +1,12 @@
-// import SearchBar from "../../components/SearchBar";
+import { Box, Paper } from "@mui/material";
+import PrimarySearchAppBar from "../../components/PrimarySearchAppBar";
 
 function Search(){
     return(
         <div>
-            搜索页面
-            {/* <SearchBar/> */}
+           <Paper style={{ backgroundColor: '#000000' }}>
+             <PrimarySearchAppBar></PrimarySearchAppBar>
+          </Paper>
         </div>
     )
 }

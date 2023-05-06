@@ -81,7 +81,7 @@ function Login() {
         console.log(response.data);
         if (response.data.code==0){
           setCorrectPassword(true);
-          console.log("userId",response.data.data.adminId);
+          console.log("userId",response.data.data.userId);
           navigate("/home", { state: { data: response.data.data.userId } })
         }
         else{

@@ -5,6 +5,7 @@ import Home from "./pages/recommender/Home";
 import Register from "./pages/recommender/Register";
 import Dashboard from "./pages/backstage/Dashboard";
 import Search from "./pages/recommender/Search";
+import Profile from "./pages/recommender/Profile";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
