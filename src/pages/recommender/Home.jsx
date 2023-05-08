@@ -35,12 +35,13 @@ function Home(){
         console.log(response.data);
         if (response.data.code==0){
           // console.log("用户头像地址",response.data.data.avatar,"用户名",response.data.data.username);
-          setUserAvatar(response.data.data.avatar)
+          setUserAvatar(response.data.data.avatar+"?random="+new Date().getTime())
           setUsername(response.data.data.username)
         }
         else{
           //code为-1
           setUserAvatar("http://localhost:8099/userAvatars/default.jpg")
+          setUsername("John Doe")
         }});
   
       /**
@@ -49,6 +50,7 @@ function Home(){
       axios.get("http://localhost:8088/movie/recommendation/mostViewed").
       then((response) => {
         if (response.data.code==0){
+          console.log("mostViewed",response.data)
           setMostViewedData(response.data.data);
         }
         else{
@@ -75,6 +77,7 @@ function Home(){
          */
         axios.get("http://localhost:8088/movie/recommendation/topRated").
         then((response) => {
+          console.log("topRated",response.data)
           if (response.data.code==0){
             setTopRatedData(response.data.data);
           }
@@ -85,21 +88,10 @@ function Home(){
 
     },[]);
 
-    
-
-    //获取6个最高评价的影片
-
-    //获取6个最多评价的影片
-
-    //获取6个最近最多评价(最近热门)的影片
-
-
-    
-
     return(
         <div>
           <Paper style={{ backgroundColor: '#000000' }}>
-          <PrimarySearchAppBar userAvatar={userAvatar} username={username}/>
+          <PrimarySearchAppBar userAvatar={userAvatar} username={username} userId={userId}/>
           <Box height={"50px"}></Box>
           <Grid container >
               <Grid item xs={0.5}></Grid>
@@ -113,7 +105,7 @@ function Home(){
             <Grid container>
                 <Grid item xs={0.5}></Grid>
                 <Grid item xs={11}>
-                    <MovieList movieData={cfData}/>
+                    <MovieList movieData={cfData} userId={userId}/>
                 </Grid>
                 <Grid item xs={0.5}></Grid>
             </Grid>
@@ -147,7 +139,7 @@ function Home(){
             <Grid container>
                 <Grid item xs={0.5}></Grid>
                 <Grid item xs={11}>
-                    <MovieList movieData={topRatedData}/>
+                    <MovieList movieData={topRatedData} userId={userId}/>
                 </Grid>
                 <Grid item xs={0.5}></Grid>
             </Grid>
@@ -164,7 +156,7 @@ function Home(){
             <Grid container>
                 <Grid item xs={0.5}></Grid>
                 <Grid item xs={11}>
-                    <MovieList movieData={mostViewedData}/>
+                    <MovieList movieData={mostViewedData} userId={userId}/>
                 </Grid>
                 <Grid item xs={0.5}></Grid>
             </Grid>

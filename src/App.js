@@ -6,6 +6,7 @@ import Register from "./pages/recommender/Register";
 import Dashboard from "./pages/backstage/Dashboard";
 import Search from "./pages/recommender/Search";
 import Profile from "./pages/recommender/Profile";
+import VideoDetail from "./pages/recommender/VideoDetail";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/search" element={<Search />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/videoDetail" element={<VideoDetail />} />
         <Route path="/*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

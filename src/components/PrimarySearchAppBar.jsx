@@ -17,6 +17,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import Avatar from '@mui/material/Avatar';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -70,6 +71,23 @@ export default function PrimarySearchAppBar(props) {
   //获取用户名和头像地址
   var userAvatar=props.userAvatar
   var username=props.username
+  var userId=props.userId;
+
+  //搜索框里的值
+  const [searchValue, setSearchValue] = React.useState('');
+  //处理搜索框里的值
+  const handleSearchInputChange = (event) => {
+    //console.log("handleSearchInputChange")
+    setSearchValue(event.target.value);
+  };
+  //处理提交搜索框里的值
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    console.log(searchValue);
+    // navigate同时将userId和searchValue传进去
+    navigate("/search",{ state: { userId, searchValue } })
+  };
+
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -93,7 +111,8 @@ export default function PrimarySearchAppBar(props) {
   const handleToProfile=()=>{
     setAnchorEl(null);
     handleMobileMenuClose();
-    navigate("/profile")
+    //点击跳转到用户信息界面
+    navigate("/profile", { state: { data: userId } })
   }
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -116,7 +135,7 @@ export default function PrimarySearchAppBar(props) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleToProfile}>Profile</MenuItem>
       <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
     </Menu>
   );
@@ -207,12 +226,19 @@ export default function PrimarySearchAppBar(props) {
             基于协同过滤的视频推荐系统
           </Typography>
               <Search>
-                  <IconButton type="button" sx={{ p: '20px' }} aria-label="search">
-                      <SearchIconWrapper>
-                          <SearchIcon />
-                       </SearchIconWrapper>
+                <form onSubmit={handleSearchSubmit}>
+                <StyledInputBase 
+                      placeholder="影片搜索" 
+                      inputProps={{ 'aria-label': 'search' }} 
+                      value={searchValue} 
+                      onChange={handleSearchInputChange}/>
+                <IconButton sx={{ p: '20px' }} aria-label="search" type='submit'>
+                    <SearchIconWrapper>
+                      <SearchIcon/>
+                    </SearchIconWrapper>
                   </IconButton>
-                  <StyledInputBase placeholder="影片搜索" inputProps={{ 'aria-label': 'search' }}/>
+                  
+                </form>
               </Search>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
