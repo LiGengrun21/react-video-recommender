@@ -88,6 +88,10 @@ export default function PrimarySearchAppBar(props) {
     navigate("/search",{ state: { userId, searchValue } })
   };
 
+  const handleBacktoHome=(event)=>{
+    navigate("/home", { state: { data: userId } })
+  }
+
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -208,7 +212,7 @@ export default function PrimarySearchAppBar(props) {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
+          <IconButton onClick={handleBacktoHome}
             size="large"
             edge="start"
             color="inherit"
