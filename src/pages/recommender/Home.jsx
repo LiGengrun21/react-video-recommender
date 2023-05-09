@@ -98,7 +98,7 @@ function Home(){
               <Grid item xs={11}>
                 <Typography variant="h7" color="primary" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }} style={{ fontWeight: 'bold' }}>
                     个性化推荐影片
-                </Typography>
+                </Typography><br/>
               </Grid>
               <Grid item xs={0.5}></Grid>
           </Grid>

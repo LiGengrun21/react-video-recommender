@@ -1,5 +1,4 @@
 import { useLocation } from "react-router-dom";
-import { JolPlayer } from "jol-player";
 import * as React from 'react';
 import axios from "axios";
 import PrimarySearchAppBar from "../../components/PrimarySearchAppBar";
@@ -7,7 +6,7 @@ import Grid from '@mui/material/Grid';
 import { Card, CardContent, CardMedia } from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import CommentSection from "../../components/CommentSection";
-
+import MyScore from "../../components/MyScore";
 
 function VideoDetail(){
     //获取首页或其它页面传来的userId
@@ -32,6 +31,9 @@ function VideoDetail(){
     const [director, setDirector]=React.useState('')
     const [videoUrl, setVideoUrl]=React.useState('')
     // const [pictureUrl, setPictureUrl]=React.useState('')
+
+    //电影平均分
+    const [movieScore, setMovieScore]=React.useState()
     
     React.useEffect(() => {
 
@@ -83,6 +85,20 @@ function VideoDetail(){
             console.log(error);
         });
 
+        /**
+        * 根据userId和movieId获取平均分
+        */
+        axios.get(`http://localhost:8088/movie/rating?movieId=${movieId}`).
+        then((response) => {
+          console.log(response.data);
+          if (response.data.code==0){
+            setMovieScore(response.data.data)
+          }
+          else{
+            //code为-1
+            setMovieScore()
+          }});
+
        
        },[videoUrl]);
 
@@ -93,29 +109,27 @@ function VideoDetail(){
 
             <PrimarySearchAppBar userAvatar={userAvatar} username={username} userId={userId}/>
             <Grid container spacing={2}>
-                <Grid item xs={6.5}>
-                {/* <JolPlayer option={{
-                    videoSrc: videoUrl, //视频资源存在nginx里
-                    width: 750,
-                    height: 420,
-                    autoPlay: true,
-                }}/> */}
+                <Grid item xs={0.2}/>
+                <Grid item xs={6.3}>
                 {videoUrl && (
                     <video controls width="750" height="420">
                         <source src={videoUrl}/>
                     </video>
                 )}
+                {movieScore && <MyScore movieScore={movieScore}/>}
+                
                 </Grid>
                 <Grid item xs={5.5}>
-                    {movieName} <br />
-                    导演：{director}<br/>
-                    主演：{actor}<br/>
-                    类型：{genre}<br/>
-                    语言：{language}<br/>
-                    拍摄日期：{shootDate}<br/>
-                    上映日期：{releaseDate}<br/>
-                    电影时长：{duration}<br/>
-                    简介：{description} <br/>
+                    <br/>
+                    <h1>{movieName}</h1> <br />
+                    <strong>导演：</strong>{director}<br/><br/>
+                    <strong>主演：</strong>{actor}<br/><br/>
+                    <strong>类型：</strong>{genre}<br/><br/>
+                    <strong>语言：</strong>{language}<br/><br/>
+                    <strong>拍摄日期：</strong>{shootDate}<br/><br/>
+                    <strong>上映日期：</strong>{releaseDate}<br/><br/>
+                    <strong>电影时长：</strong>{duration}<br/><br/>
+                    <strong>简介：</strong>{description} <br/><br/>
                 </Grid>
                 {/* <CommentSection/> */}
             </Grid>
