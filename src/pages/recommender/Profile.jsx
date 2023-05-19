@@ -45,6 +45,7 @@ function Profile(){
     const data = new FormData(event.currentTarget);
     data.append("userId",userId)
     data.append("deleted",deleted)
+    data.append("userAvatar",userAvatar)
 
     console.log(data.get("email"),data.get("password"),data.get("username"));
  
@@ -76,10 +77,6 @@ function Profile(){
         //code为-1
         console.log("用户信息修改失败")
       }});
-
-    /**
-     * 调用修改用户头像的API
-     */
     
   }
 

@@ -7,7 +7,6 @@ import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
-import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -26,6 +25,13 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import { useNavigate } from 'react-router-dom';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { Container } from '@mui/material';
+import { Typography, Avatar } from '@mui/material';
+import axios from "axios";
+import Alert from '@mui/material/Alert';
 
 const drawerWidth = 240;
 
@@ -95,10 +101,21 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-function Dashboard(props){
+function AdminProfile(props){
     const location = useLocation();
     const adminId = location.state.adminId;
     const permission=location.state.permission;
+
+    //管理员信息
+    const [adminAvatar,setAdminAvatar]=React.useState('') //头像地址
+    const [adminName, setAdminName]=React.useState('')
+    const [email, setEmail]=React.useState('')
+    const [password, setPassword]=React.useState('')
+    const [deleted, setDeleted]=React.useState(0)
+    const [image, setImage]=React.useState(null) //头像文件
+    //邮箱格式判断
+    const [isEmailValid, setIsEmailValid] = React.useState(true);
+
     
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -135,9 +152,99 @@ function Dashboard(props){
         navigate("/login")
       };
     
+  
+      const handleSubmit = (event) => {
+        event.preventDefault();
+    
+        //获取并打印输入的数据
+        const data = new FormData(event.currentTarget)
+        data.append("adminId",adminId)
+        data.append("deleted",deleted)
+        data.append("avatar",adminAvatar)
+        data.append("permission",permission)
+    
+        console.log(data.get("email"),data.get("password"),data.get("adminName"));
+     
+    
+        //判断新邮箱是否符格式
+         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+         if (emailRegex.test(email)){
+           setIsEmailValid(true);
+         }
+         else{
+           setIsEmailValid(false);
+           return;
+         }
+     
+        //不用判断新邮箱是否和其它用户的相同，因为后端实现
+        /**
+         * 调用修改管理员信息的API
+         */
+        axios.put("http://localhost:8088/admin/adminId",data).
+        then((response) => {
+          console.log(response.data);
+          if (response.data.code==0){
+           setAdminName(response.data.data.adminName)
+           setEmail(response.data.data.email)
+           setPassword(response.data.data.password)
+           setDeleted(response.data.data.deleted)
+          }
+          else{
+            //code为-1
+            console.log("管理员信息修改失败")
+          }});
+        
+      }
+
+      const handleChangeAvatar=(event)=>{
+        const fileData = event.target.files[0];
+        const formData = new FormData();
+        formData.append('adminAvatar', fileData);
+        formData.append('adminId', adminId);
+        axios.post('http://localhost:8088/admin/upload/avatar', formData)
+          .then(response => {
+            console.log(response.data);
+            if (response.data.code==0){
+              setAdminAvatar(response.data.data.avatar+"?random="+new Date().getTime());
+              console.log(adminAvatar)
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
+    
+      const handleClick=()=>{
+        const myinput=document.getElementById("avatar-upload");
+        myinput.click();
+      }
+
+      React.useEffect(() => {
+
+        /**
+          * 根据adminId获取用户的所有信息
+          */
+        axios.get(`http://localhost:8088/admin/existed/adminId?adminId=${adminId}`).
+        then((response) => {
+          console.log(response.data);
+          if (response.data.code==0){
+           setAdminAvatar(response.data.data.avatar+"?random="+new Date().getTime())
+           setAdminName(response.data.data.adminName)
+           setEmail(response.data.data.email)
+           setPassword(response.data.data.password)
+          }
+          else{
+            //code为-1
+            console.log("没有拿到管理员信息")
+          }});
+       },[]);
+    
 
     return(
         <div>
+             {!isEmailValid && (
+      <Alert severity="error">邮箱格式错误</Alert>
+      )}
             <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" open={open}>
@@ -155,7 +262,7 @@ function Dashboard(props){
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            基于协同过滤的视频推荐系统 管理后台
+            基于协同过滤的视频推荐系统 个人资料
           </Typography>
         </Toolbar>
       </AppBar>
@@ -167,28 +274,6 @@ function Dashboard(props){
         </DrawerHeader>
         <Divider />
         <List>
-          {/* {['控制台', '用户管理', '视频管理', '个人资料','退出登录'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <MovieIcon /> : <PersonIcon/>}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))} */}
            <ListItem  disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={{
@@ -324,53 +409,94 @@ function Dashboard(props){
               </ListItemButton>
             </ListItem>
         </List>
-        {/* <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List> */}
       </Drawer>
-      {/* <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <DrawerHeader />
-        <Typography paragraph>
-         ac.
-        </Typography>
-        <Typography paragraph>
-        a.
-        </Typography>
-      </Box> */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <DrawerHeader />
-        <Typography paragraph>
-          管理员 {adminId}
-        </Typography>
-        <Typography paragraph>
-          权限 {permission}
-        </Typography>
       </Box>
-    </Box>
-        </div>
+
+
+      <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+           <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              // aria-controls={menuId}
+              aria-haspopup="true"
+              // onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+                <label htmlFor="avatar-input">
+                  <Avatar sx={{ m: 10, bgcolor: 'secondary.main' }} src={adminAvatar} style={{transform: 'scale(4)'}} onClick={handleClick}  >
+                  
+                  </Avatar> 
+                  <input accept="image/*" id="avatar-upload" type="file" onChange={handleChangeAvatar} style={{ display:"none"}}/>
+            
+                </label>
+            </IconButton>
+          <Typography component="h1" variant="h5">
+            管理员个人资料
+          </Typography>
+          <Box component="form"  onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="邮箱地址"
+              name="email"
+              // autoComplete="email"
+              // autoFocus
+              value={email}
+              // InputProps={{
+              //   readOnly: true
+              // }}
+              onChange={(event)=>setEmail(event.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="adminName"
+              label="账户名"
+              id="adminName"
+              value={adminName}
+              // InputProps={{
+              //   readOnly: true
+              // }}
+              onChange={(event)=>setAdminName(event.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="密码"
+              id="password"
+              value={password}
+              // InputProps={{
+              //   readOnly: true
+              // }}
+              onChange={(event)=>setPassword(event.target.value)}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              保存
+            </Button>
+            <Grid container>
+            </Grid>
+          </Box>
+        </Box>
+    </div>
     )
 }
 
-export default Dashboard;
+export default AdminProfile;

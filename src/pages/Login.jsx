@@ -99,7 +99,7 @@ function Login() {
         if (response.data.code==0){
           setCorrectPassword(true);
           console.log("adminId",response.data.data.adminId);
-          navigate("/dashboard", { state: { data: response.data.data.adminId } })
+          navigate("/dashboard", { state: { adminId: response.data.data.adminId, permission: response.data.data.permission } })
         }
         else{
           //code为-1

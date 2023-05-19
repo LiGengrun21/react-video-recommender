@@ -95,7 +95,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-function Dashboard(props){
+function VideoManagement(props){
     const location = useLocation();
     const adminId = location.state.adminId;
     const permission=location.state.permission;
@@ -155,7 +155,7 @@ function Dashboard(props){
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            基于协同过滤的视频推荐系统 管理后台
+            基于协同过滤的视频推荐系统 视频管理
           </Typography>
         </Toolbar>
       </AppBar>
@@ -373,4 +373,4 @@ function Dashboard(props){
     )
 }
 
-export default Dashboard;
+export default VideoManagement;
