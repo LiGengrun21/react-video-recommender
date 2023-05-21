@@ -17,8 +17,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import MovieIcon from '@mui/icons-material/Movie';
 import PersonIcon from '@mui/icons-material/Person';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
@@ -26,6 +24,37 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+import { DataGrid } from '@mui/x-data-grid/DataGrid';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
+const columns = [
+  { field: 'adminId', headerName: '管理员ID', width: 150 },
+  { field: 'adminName', headerName: '管理员名', width: 250 },
+  { field: 'email', headerName: '邮箱', width: 250 },
+  { field: 'password', headerName: '密码', width: 250,},
+  { field: 'permission',
+  headerName: '权限',
+  description: '若permission为0，显示普通管理员；若permission为1，显示超级管理员',
+  sortable: false,
+  width: 200,
+  valueGetter: (params) =>(params.row.permission === 0 ? '普通管理员' : '超级管理员'),
+  },
+  { field: 'deleted',
+    headerName: '状态',
+    description: '若deleted为0，显示正常；若deleted为1，显示已注销',
+    sortable: false,
+    width: 200,
+    valueGetter: (params) =>(params.row.deleted === 0 ? '正常' : '已注销'),
+  },
+];
 
 const drawerWidth = 240;
 
@@ -99,6 +128,69 @@ function AdminManagement(props){
     const location = useLocation();
     const adminId = location.state.adminId;
     const permission=location.state.permission;
+
+    const [adminList, setAdminList]=React.useState();//管理员列表
+    const [isLoading, setIsLoading] = React.useState(true);//由于数据加载慢，则在axios的finally里判断
+
+    //添加表单
+    const [addEmail, setAddEmail]=React.useState("");
+    const [addPassword, setAddPassword]=React.useState("")
+    const [addAdminName, setAddAdminName]=React.useState("")
+
+    /**
+     * 控制添加按钮
+     */
+    const [add, setAdd] = React.useState(false);
+
+    /**
+     * 选定的行
+     */
+    const [selectedRows, setSelectedRows] = React.useState([]);
+
+    const handleSelectionModelChange = (newSelection) => {
+      setSelectedRows(newSelection);
+    };
+  
+
+    const handleDelete = () => {
+      console.log(selectedRows)
+      // 在这里执行删除操作，例如与后端通信并从数据库中删除选定的行
+      // 删除成功后，更新用户界面，可以重新加载数据或从 adminList 中移除被删除的行
+      selectedRows.forEach(i=>{
+        console.log(i)
+        axios.delete(`http://localhost:8088/admin/logic?adminId=${i}`).
+        then((response) => {
+          console.log(response.data);
+        });
+      })
+      window.location.reload();
+    };
+
+    //点击添加按钮打开模态框
+    const handleClickAdd = () => {
+      setAdd(true);
+    };
+  
+    //关闭模态框
+    const handleCloseAdd = () => {
+      setAdd(false);
+    };
+
+    //表单提交
+    const handleSubmitAdd=(event)=>{
+      event.preventDefault();
+      const data = new FormData();
+      data.append("email",addEmail)
+      data.append("password",addPassword)
+      data.append("adminName",addAdminName)
+      // console.log("添加表单提交",data);
+      axios.post("http://localhost:8088/admin",data).
+      then((response) => {
+        console.log(response.data);
+    });
+      //关闭模态框
+      setAdd(false);
+    }
     
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -134,6 +226,30 @@ function AdminManagement(props){
     const handleLogoutClick = () => {
         navigate("/login")
       };
+
+    
+      React.useEffect(() => {
+
+        /**
+          * 获取管理员列表
+          */
+        axios.get("http://localhost:8088/admin/list").
+        then((response) => {
+          if (response.data.code==0){
+            setAdminList(response.data.data)
+            console.log("管理员列表：",adminList);
+          }
+          else{
+            //code为-1
+            console.log("没有管理员列表")
+          }})
+          .catch((error)=>{
+            console.log("请求出错",error);
+          })
+          .finally(()=>{
+            setIsLoading(false);
+          });
+       },[]);
     
 
     return(
@@ -167,28 +283,6 @@ function AdminManagement(props){
         </DrawerHeader>
         <Divider />
         <List>
-          {/* {['控制台', '用户管理', '视频管理', '个人资料','退出登录'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <MovieIcon /> : <PersonIcon/>}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))} */}
            <ListItem  disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={{
@@ -324,49 +418,76 @@ function AdminManagement(props){
               </ListItemButton>
             </ListItem>
         </List>
-        {/* <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List> */}
       </Drawer>
-      {/* <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <DrawerHeader />
-        <Typography paragraph>
-         ac.
-        </Typography>
-        <Typography paragraph>
-        a.
-        </Typography>
-      </Box> */}
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
-        <Typography paragraph>
-          管理员 {adminId}
-        </Typography>
-        <Typography paragraph>
-          权限 {permission}
-        </Typography>
+        <div>
+          {isLoading ? (<div>Loading...</div>) : (
+            
+      <div style={{ height: 550, width: '100%' }}>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" color="success" onClick={handleClickAdd}>添加</Button>
+          <Dialog open={add} onClose={handleCloseAdd}>
+             <form onSubmit={handleSubmitAdd}>
+             <DialogTitle>添加新管理员</DialogTitle>
+              <DialogContent>
+                  {/* <DialogContentText>
+                    添加一个普通管理员，需要输入邮箱、管理员名称、密码。
+                  </DialogContentText> */}
+              <TextField
+                autoFocus
+                margin="dense"
+                id="email-add"
+                label="邮箱地址"
+                type="email"
+                fullWidth
+                variant="standard"
+                onChange={(event)=>setAddEmail(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="adminName-add"
+                label="管理员名称"
+                fullWidth
+                variant="standard"
+                onChange={(event)=>setAddAdminName(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="password-add"
+                label="密码"
+                type="password"
+                fullWidth
+                variant="standard"
+                onChange={(event)=>setAddPassword(event.target.value)}
+                />
+            </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseAdd}>取消</Button>
+                    <Button type='submit'>提交</Button>
+                </DialogActions>
+             </form>
+          </Dialog>
+          <Button variant="contained" color="warning">更新</Button>
+          <Button variant="contained" color="error" onClick={handleDelete}>停用账户</Button>
+          <Button variant="contained" color="secondary">恢复账户</Button>
+        </Stack>
+        <br/>
+      <DataGrid
+          rows={adminList}
+          columns={columns}
+          getRowId={(row) => row.adminId}
+          initialState={{
+          pagination: {
+          paginationModel: { page: 0, pageSize: 10 },
+        },}}
+          pageSizeOptions={[10,20,50]}
+          checkboxSelection
+          onRowSelectionModelChange={handleSelectionModelChange}
+          />
+  </div>
+    )}
+  </div>
       </Box>
     </Box>
         </div>

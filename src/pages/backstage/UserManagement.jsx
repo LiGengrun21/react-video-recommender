@@ -17,8 +17,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import MovieIcon from '@mui/icons-material/Movie';
 import PersonIcon from '@mui/icons-material/Person';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
@@ -26,6 +24,24 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import { useNavigate } from 'react-router-dom';
+import { DataGrid } from '@mui/x-data-grid/DataGrid';
+import axios from "axios";
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+
+const columns = [
+  { field: 'userId', headerName: '用户ID', width: 100 },
+  { field: 'username', headerName: '用户名', width: 300 },
+  { field: 'email', headerName: '邮箱', width: 300 },
+  { field: 'password', headerName: '密码', width: 300,},
+  { field: 'deleted',
+    headerName: '状态',
+    description: '若deleted为0，显示正常；若deleted为1，显示已注销',
+    sortable: false,
+    width: 200,
+    valueGetter: (params) =>(params.row.deleted === 0 ? '正常' : '已注销'),
+  },
+];
 
 const drawerWidth = 240;
 
@@ -99,6 +115,9 @@ function UserManagement(props){
     const location = useLocation();
     const adminId = location.state.adminId;
     const permission=location.state.permission;
+
+    const [userList, setUserList]=React.useState();//用户列表
+    const [isLoading, setIsLoading] = React.useState(true);//由于数据加载慢，则在axios的finally里判断
     
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -134,6 +153,29 @@ function UserManagement(props){
     const handleLogoutClick = () => {
         navigate("/login")
       };
+
+      React.useEffect(() => {
+
+        /**
+          * 获取用户列表
+          */
+        axios.get("http://localhost:8088/user/list").
+        then((response) => {
+          if (response.data.code==0){
+            setUserList(response.data.data)
+            // console.log("用户列表：",userList);
+          }
+          else{
+            //code为-1
+            console.log("没有用户列表")
+          }})
+          .catch((error)=>{
+            console.log("请求出错",error);
+          })
+          .finally(()=>{
+            setIsLoading(false);
+          });
+       },[userList]);
     
 
     return(
@@ -167,28 +209,6 @@ function UserManagement(props){
         </DrawerHeader>
         <Divider />
         <List>
-          {/* {['控制台', '用户管理', '视频管理', '个人资料','退出登录'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <MovieIcon /> : <PersonIcon/>}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))} */}
            <ListItem  disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={{
@@ -324,49 +344,34 @@ function UserManagement(props){
               </ListItemButton>
             </ListItem>
         </List>
-        {/* <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List> */}
       </Drawer>
-      {/* <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <DrawerHeader />
-        <Typography paragraph>
-         ac.
-        </Typography>
-        <Typography paragraph>
-        a.
-        </Typography>
-      </Box> */}
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
-        <Typography paragraph>
-          管理员 {adminId}
-        </Typography>
-        <Typography paragraph>
-          权限 {permission}
-        </Typography>
+
+        <div>
+          {isLoading ? (<div>Loading...</div>) : (
+            
+      <div style={{ height: 550, width: '100%' }}>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" color="success">恢复账户</Button>
+          <Button variant="contained" color="error">注销账户</Button>
+          <Button variant="contained" color="secondary">更新</Button>
+        </Stack>
+        <br/>
+      <DataGrid
+          rows={userList}
+          columns={columns}
+          getRowId={(row) => row.userId}
+          initialState={{
+          pagination: {
+          paginationModel: { page: 0, pageSize: 20 },
+        },}}
+          pageSizeOptions={[20, 50, 100]}
+          checkboxSelection
+          />
+  </div>
+    )}
+  </div>
       </Box>
     </Box>
         </div>

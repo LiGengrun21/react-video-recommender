@@ -17,8 +17,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import MovieIcon from '@mui/icons-material/Movie';
 import PersonIcon from '@mui/icons-material/Person';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
@@ -26,6 +24,23 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+import { DataGrid } from '@mui/x-data-grid/DataGrid';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+
+const columns = [
+  { field: 'movieId', headerName: '电影ID', width: 100 },
+  { field: 'name', headerName: '电影标题', width: 150 },
+  { field: 'actor', headerName: '演员', width: 150 },
+  { field: 'director', headerName: '导演', width: 150},
+  { field: 'language', headerName: '语言', width: 100},
+  { field: 'genre', headerName: '类型', width: 100},
+  { field: 'duration', headerName: '时长', width: 100},
+  { field: 'shootDate', headerName: '拍摄日期', width: 100},
+  { field: 'releaseDate', headerName: '上映日期', width: 100},
+  { field: 'description', headerName: '详情', width: 250},
+];
 
 const drawerWidth = 240;
 
@@ -99,6 +114,9 @@ function VideoManagement(props){
     const location = useLocation();
     const adminId = location.state.adminId;
     const permission=location.state.permission;
+
+    const [movieList, setMovieList]=React.useState();//电影列表
+    const [isLoading, setIsLoading] = React.useState(true);//由于数据加载慢，则在axios的finally里判断
     
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -134,6 +152,29 @@ function VideoManagement(props){
     const handleLogoutClick = () => {
         navigate("/login")
       };
+
+      React.useEffect(() => {
+
+        /**
+          * 获取管理员列表
+          */
+        axios.get("http://localhost:8088/movie/list").
+        then((response) => {
+          if (response.data.code==0){
+            setMovieList(response.data.data)
+            console.log("电影列表：",movieList);
+          }
+          else{
+            //code为-1
+            console.log("没有电影列表")
+          }})
+          .catch((error)=>{
+            console.log("请求出错",error);
+          })
+          .finally(()=>{
+            setIsLoading(false);
+          });
+       },[movieList]);
     
 
     return(
@@ -167,28 +208,6 @@ function VideoManagement(props){
         </DrawerHeader>
         <Divider />
         <List>
-          {/* {['控制台', '用户管理', '视频管理', '个人资料','退出登录'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <MovieIcon /> : <PersonIcon/>}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))} */}
            <ListItem  disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={{
@@ -324,49 +343,32 @@ function VideoManagement(props){
               </ListItemButton>
             </ListItem>
         </List>
-        {/* <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List> */}
       </Drawer>
-      {/* <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <DrawerHeader />
-        <Typography paragraph>
-         ac.
-        </Typography>
-        <Typography paragraph>
-        a.
-        </Typography>
-      </Box> */}
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
-        <Typography paragraph>
-          管理员 {adminId}
-        </Typography>
-        <Typography paragraph>
-          权限 {permission}
-        </Typography>
+        <div>
+          {isLoading ? (<div>Loading...</div>) : (
+            
+      <div style={{ height: 550, width: '100%' }}>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" color="success">修改</Button>
+          {/* <Button variant="contained" color="primary">修改</Button> */}
+        </Stack>
+        <br/>
+      <DataGrid
+          rows={movieList}
+          columns={columns}
+          getRowId={(row) => row.movieId}
+          initialState={{
+          pagination: {
+          paginationModel: { page: 0, pageSize: 20 },
+        },}}
+          pageSizeOptions={[20,50,100]}
+          checkboxSelection
+          />
+  </div>
+    )}
+  </div>
       </Box>
     </Box>
         </div>
