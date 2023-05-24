@@ -139,10 +139,13 @@ function AdminManagement(props){
     const [addAdminName, setAddAdminName]=React.useState("")
 
     //修改表单
-    const [updateId, setUpdateId]=React.useState(0)
+    const [updateId, setUpdateId]=React.useState(0)//不能修改
     const [updateEmail, setUpdateEmail]=React.useState("")
     const [updatePassword, setUpdatePassword]=React.useState("")
     const [updateAdminName, setUpdateAdminName]=React.useState("")
+    const [updateAvatar, setUpdateAvatar]=React.useState("")//不显示
+    const [updateDeleted, setUpdateDeleted]=React.useState(0)//不显示
+    const [updatePermission, setUpdatePermission]=React.useState(0)//不显示
 
     // //用于更新按钮，判断是否选择row的条数正确，因为每次只能更新一条
     // const [updateSelect, setUpdateSelect]=React.useState(true)
@@ -221,6 +224,9 @@ function AdminManagement(props){
             setUpdateEmail(response.data.data.email)
             setUpdateAdminName(response.data.data.adminName)
             setUpdatePassword(response.data.data.password)
+            setUpdateAvatar(response.data.data.avatar)
+            setUpdateDeleted(response.data.data.deleted)
+            setUpdatePermission(response.data.data.permission)
           }
           else{
             //code为-1
@@ -264,6 +270,9 @@ function AdminManagement(props){
       data.append("email",updateEmail)
       data.append("password",updatePassword)
       data.append("adminName",updateAdminName)
+      data.append("avatar",updateAvatar)
+      data.append("deleted",updateDeleted)
+      data.append("permission",updatePermission)
       axios.put("http://localhost:8088/admin",data).
       then((response) => {
         console.log(response.data);
