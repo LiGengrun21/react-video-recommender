@@ -28,6 +28,11 @@ import axios from "axios";
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const columns = [
   { field: 'movieId', headerName: '电影ID', width: 100 },
@@ -38,7 +43,7 @@ const columns = [
   { field: 'genre', headerName: '类型', width: 100},
   { field: 'duration', headerName: '时长', width: 100},
   { field: 'shootDate', headerName: '拍摄日期', width: 100},
-  { field: 'releaseDate', headerName: '上映日期', width: 100},
+  { field: 'releaseDate', headerName: '上映日期', width: 120},
   { field: 'description', headerName: '详情', width: 250},
 ];
 
@@ -117,6 +122,142 @@ function VideoManagement(props){
 
     const [movieList, setMovieList]=React.useState();//电影列表
     const [isLoading, setIsLoading] = React.useState(true);//由于数据加载慢，则在axios的finally里判断
+
+    /**
+     * 电影信息
+     */
+    const [movieId, setMovieId]=React.useState(0)
+    const [movieName, setMovieName]=React.useState('')
+    const [description, setDescription]=React.useState('')
+    const [duration, setDuration]=React.useState('')
+    const [releaseDate, setReleaseDate]=React.useState('')
+    const [shootDate, setShootDate]=React.useState('')
+    const [language, setLanguage]=React.useState('')
+    const [genre, setGenre]=React.useState('')
+    const [actor, setActor]=React.useState('')
+    const [director, setDirector]=React.useState('')
+    const [video, setVideo]=React.useState('')
+    const [picture, setPicture]=React.useState('')
+
+     /**
+     * 控制更新按钮
+     */
+     const [update, setUpdate]=React.useState(false)
+
+     /**
+     * 选定的行
+     */
+     const [selectedRows, setSelectedRows] = React.useState([]);
+
+     const handleSelectionModelChange = (newSelection) => {
+       setSelectedRows(newSelection);
+     };
+
+      //点击更新按钮打开模态框
+     const handleClickUpdate=()=>{
+      //根据选中的row获得对应的信息
+      if (selectedRows.length!=1){
+        alert("每次请选择一条数据更新")
+        return;
+      }
+      console.log("选中的row",selectedRows[0])
+      //调用API根据userId获取数据
+      axios.get(`http://localhost:8088/movie/info?movieId=${selectedRows[0]}`).
+        then((response) => {
+          if (response.data.code==0){
+            setMovieId(response.data.data.movieId)
+            setMovieName(response.data.data.name)
+            setDescription(response.data.data.description)
+            setDuration(response.data.data.duration)
+            setDirector(response.data.data.director)
+            setActor(response.data.data.actor)
+            setLanguage(response.data.data.language)
+            setPicture(response.data.data.picture)
+            setVideo(response.data.data.video)
+            setGenre(response.data.data.genre)
+            setReleaseDate(response.data.data.releaseDate)
+            setShootDate(response.data.data.shootDate)
+          }
+          else{
+            //code为-1
+            console.log("没有获取到这个电影")
+          }})
+      setUpdate(true)
+    }
+
+     //关闭更新模态框
+     const handleCloseUpdate=()=>{
+      setUpdate(false)
+    }
+
+     //更新表单提交
+     const handleSubmitUpdate=(event)=>{
+      event.preventDefault();
+      const data = new FormData();
+      data.append("movieId",movieId)
+      data.append("name",movieName)
+      data.append("description",description)
+      data.append("duration",duration)
+      data.append("actor",actor)
+      data.append("director",director)
+      data.append("shootDate",shootDate)
+      data.append("releaseDate",releaseDate)
+      data.append("genre", genre)
+      data.append("picture",picture)
+      data.append("video",video)
+      data.append("language",language)
+
+      axios.put("http://localhost:8088/movie/info",data).
+      then((response) => {
+        console.log(response.data);
+    });
+      //关闭模态框
+      setUpdate(false);
+      window.location.reload(); //页面刷新
+    }
+
+    /**
+     * 处理图片上传
+     */
+    const handleChangePicture=(event)=>{
+      const fileData = event.target.files[0];
+      const formData = new FormData();
+      formData.append('moviePicture', fileData);
+      formData.append('movieId', movieId);
+      axios.post('http://localhost:8088/movie/picture', formData)
+        .then(response => {
+          console.log(response.data);
+          if (response.data.code==0){
+            setPicture(response.data.data.picture)
+            console.log(picture)
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+
+    /**
+     * 处理视频上传
+     */
+    const handleChangeVideo=(event)=>{
+      const fileData = event.target.files[0];
+      const formData = new FormData();
+      formData.append('movieVideo', fileData);
+      formData.append('movieId', movieId);
+      axios.post('http://localhost:8088/movie/video', formData)
+        .then(response => {
+          console.log(response.data);
+          if (response.data.code==0){
+            setVideo(response.data.data.video)
+            console.log(video)
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  
     
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -354,8 +495,115 @@ function VideoManagement(props){
             
       <div style={{ height: 550, width: '100%' }}>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" color="success">修改</Button>
-          {/* <Button variant="contained" color="primary">修改</Button> */}
+          <Button variant="contained" color="success" onClick={handleClickUpdate}>修改</Button>
+          <Dialog open={update} onClose={handleCloseUpdate}>
+             <form onSubmit={handleSubmitUpdate}>
+             <DialogTitle>更新电影信息</DialogTitle>
+              <DialogContent>
+              {/* <TextField
+                margin="dense"
+                id="movieId-update"
+                label="电影ID"
+                fullWidth
+                variant="standard"
+                value={movieId}
+                readOnly
+                /> */}
+              <TextField
+                autoFocus
+                margin="dense"
+                id="name"
+                label="标题"
+                fullWidth
+                variant="standard"
+                value={movieName}
+                onChange={(event)=>setMovieName(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="director"
+                label="导演"
+                fullWidth
+                variant="standard"
+                value={director}
+                onChange={(event)=>setDirector(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="actor"
+                label="演员"
+                fullWidth
+                variant="standard"
+                multiline
+                value={actor}
+                onChange={(event)=>setActor(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="genre"
+                label="类型"
+                fullWidth
+                variant="standard"
+                value={genre}
+                onChange={(event)=>setGenre(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="duration"
+                label="时长"
+                fullWidth
+                variant="standard"
+                value={duration}
+                onChange={(event)=>setDuration(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="language"
+                label="语言"
+                fullWidth
+                variant="standard"
+                value={language}
+                onChange={(event)=>setLanguage(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="releaseDate"
+                label="发行日期"
+                fullWidth
+                variant="standard"
+                value={releaseDate}
+                onChange={(event)=>setReleaseDate(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="shootDate"
+                label="拍摄日期"
+                fullWidth
+                variant="standard"
+                value={shootDate}
+                onChange={(event)=>setShootDate(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="description"
+                label="简介"
+                fullWidth
+                variant="standard"
+                multiline
+                value={description}
+                onChange={(event)=>setDescription(event.target.value)}
+                />
+                <br/><br/>
+                <input accept="image/*" id="picture-upload" type="file" onChange={handleChangePicture}/>
+                <input accept="video/*" id="video-upload" type="file" onChange={handleChangeVideo}/>
+
+            </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseUpdate}>取消</Button>
+                    <Button type='submit'>提交</Button>
+                </DialogActions>
+             </form>
+          </Dialog>
         </Stack>
         <br/>
       <DataGrid
@@ -368,6 +616,7 @@ function VideoManagement(props){
         },}}
           pageSizeOptions={[20,50,100]}
           checkboxSelection
+          onRowSelectionModelChange={handleSelectionModelChange}
           />
   </div>
     )}
