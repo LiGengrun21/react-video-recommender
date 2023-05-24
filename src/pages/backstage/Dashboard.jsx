@@ -137,6 +137,8 @@ function Dashboard(props){
 
     const [mostViewedData, setMostViewedData]=React.useState()
     const [scoreDistribution, setScoreDistribution]=React.useState()
+
+    //const [isSupperAdmin, setIsSupperAdmin]=React.useState(false)//判断登录者是否超级管理员，普通管理员无法进行管理员管理
     
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -379,28 +381,30 @@ function Dashboard(props){
               </ListItemButton>
             </ListItem>
 
-            <ListItem  disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-
-                  onClick={handleAdminClick}
-                >
-                  <SupervisorAccountIcon/>
-                </ListItemIcon>
-                <ListItemText primary={"管理员管理"} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
+            {(adminId==1) && (
+               <ListItem  disablePadding sx={{ display: 'block' }}>
+               <ListItemButton
+                 sx={{
+                   minHeight: 48,
+                   justifyContent: open ? 'initial' : 'center',
+                   px: 2.5,
+                 }}
+               >
+                 <ListItemIcon
+                   sx={{
+                     minWidth: 0,
+                     mr: open ? 3 : 'auto',
+                     justifyContent: 'center',
+                   }}
+ 
+                   onClick={handleAdminClick}
+                 >
+                   <SupervisorAccountIcon/>
+                 </ListItemIcon>
+                 <ListItemText primary={"管理员管理"} sx={{ opacity: open ? 1 : 0 }} />
+               </ListItemButton>
+             </ListItem>
+      )}
 
             <ListItem  disablePadding sx={{ display: 'block' }}>
               <ListItemButton
