@@ -34,6 +34,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { Alert } from '@mui/material';
 
 const columns = [
   { field: 'adminId', headerName: '管理员ID', width: 150 },
@@ -137,10 +138,24 @@ function AdminManagement(props){
     const [addPassword, setAddPassword]=React.useState("")
     const [addAdminName, setAddAdminName]=React.useState("")
 
+    //修改表单
+    const [updateId, setUpdateId]=React.useState(0)
+    const [updateEmail, setUpdateEmail]=React.useState("")
+    const [updatePassword, setUpdatePassword]=React.useState("")
+    const [updateAdminName, setUpdateAdminName]=React.useState("")
+
+    // //用于更新按钮，判断是否选择row的条数正确，因为每次只能更新一条
+    // const [updateSelect, setUpdateSelect]=React.useState(true)
+
     /**
      * 控制添加按钮
      */
     const [add, setAdd] = React.useState(false);
+
+    /**
+     * 控制更新按钮
+     */
+    const [update, setUpdate]=React.useState(false);
 
     /**
      * 选定的行
@@ -152,6 +167,9 @@ function AdminManagement(props){
     };
   
 
+    /**
+     * 删除账户
+     */
     const handleDelete = () => {
       console.log(selectedRows)
       // 在这里执行删除操作，例如与后端通信并从数据库中删除选定的行
@@ -163,20 +181,65 @@ function AdminManagement(props){
           console.log(response.data);
         });
       })
-      window.location.reload();
+      window.location.reload(); //页面刷新
     };
+
+    /**
+     * 恢复删除的账户
+     */
+    const handleRecover=()=>{
+      console.log(selectedRows)
+      selectedRows.forEach(i=>{
+        console.log(i)
+        axios.delete(`http://localhost:8088/admin/recover?adminId=${i}`).
+        then((response) => {
+          console.log(response.data);
+        });
+      })
+      window.location.reload(); //页面刷新
+    }
 
     //点击添加按钮打开模态框
     const handleClickAdd = () => {
       setAdd(true);
     };
+
+    //点击更新按钮打开模态框
+    const handleClickUpdate=()=>{
+      //根据选中的row获得对应的信息
+      if (selectedRows.length!=1){
+        // setUpdateSelect(false)
+        alert("每次请选择一条数据更新")
+        return;
+      }
+      console.log("选中的row",selectedRows[0])
+      //调用API根据adminId获取数据
+      axios.get(`http://localhost:8088/admin/adminId?adminId=${selectedRows[0]}`).
+        then((response) => {
+          if (response.data.code==0){
+            setUpdateId(response.data.data.adminId)
+            setUpdateEmail(response.data.data.email)
+            setUpdateAdminName(response.data.data.adminName)
+            setUpdatePassword(response.data.data.password)
+          }
+          else{
+            //code为-1
+            console.log("没有获取到这个管理员")
+          }})
+      setUpdate(true)
+    }
   
-    //关闭模态框
+    //关闭添加模态框
     const handleCloseAdd = () => {
       setAdd(false);
     };
 
-    //表单提交
+    //关闭更新模态框
+    const handleCloseUpdate=()=>{
+      setUpdate(false)
+    }
+
+    //添加表单提交
     const handleSubmitAdd=(event)=>{
       event.preventDefault();
       const data = new FormData();
@@ -190,6 +253,24 @@ function AdminManagement(props){
     });
       //关闭模态框
       setAdd(false);
+      window.location.reload(); //页面刷新
+    }
+
+    //更新表单提交
+    const handleSubmitUpdate=(event)=>{
+      event.preventDefault();
+      const data = new FormData();
+      data.append("adminId",updateId)
+      data.append("email",updateEmail)
+      data.append("password",updatePassword)
+      data.append("adminName",updateAdminName)
+      axios.put("http://localhost:8088/admin",data).
+      then((response) => {
+        console.log(response.data);
+    });
+      //关闭模态框
+      setUpdate(false);
+      window.location.reload(); //页面刷新
     }
     
     const theme = useTheme();
@@ -254,6 +335,9 @@ function AdminManagement(props){
 
     return(
         <div>
+           {/* {!updateSelect && (
+      <Alert severity="error">每次只能选择一条数据更新</Alert>
+      )} */}
             <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" open={open}>
@@ -456,7 +540,7 @@ function AdminManagement(props){
                 margin="dense"
                 id="password-add"
                 label="密码"
-                type="password"
+                // type="password"
                 fullWidth
                 variant="standard"
                 onChange={(event)=>setAddPassword(event.target.value)}
@@ -468,9 +552,59 @@ function AdminManagement(props){
                 </DialogActions>
              </form>
           </Dialog>
-          <Button variant="contained" color="warning">更新</Button>
+          <Button variant="contained" color="warning" onClick={handleClickUpdate}>更新</Button>
+          <Dialog open={update} onClose={handleCloseUpdate}>
+             <form onSubmit={handleSubmitUpdate}>
+             <DialogTitle>更新管理员信息</DialogTitle>
+              <DialogContent>
+              <TextField
+                margin="dense"
+                id="adminId-update"
+                label="管理员ID"
+                fullWidth
+                variant="standard"
+                value={updateId}
+                readOnly
+                />
+              <TextField
+                autoFocus
+                margin="dense"
+                id="email-update"
+                label="邮箱地址"
+                type="email"
+                fullWidth
+                variant="standard"
+                value={updateEmail}
+                onChange={(event)=>setUpdateEmail(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="adminName-update"
+                label="管理员名称"
+                fullWidth
+                variant="standard"
+                value={updateAdminName}
+                onChange={(event)=>setUpdateAdminName(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="password-update"
+                label="密码"
+                // type="password"
+                fullWidth
+                variant="standard"
+                value={updatePassword}
+                onChange={(event)=>setUpdatePassword(event.target.value)}
+                />
+            </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseUpdate}>取消</Button>
+                    <Button type='submit'>提交</Button>
+                </DialogActions>
+             </form>
+          </Dialog>
           <Button variant="contained" color="error" onClick={handleDelete}>停用账户</Button>
-          <Button variant="contained" color="secondary">恢复账户</Button>
+          <Button variant="contained" color="secondary" onClick={handleRecover}>恢复账户</Button>
         </Stack>
         <br/>
       <DataGrid
