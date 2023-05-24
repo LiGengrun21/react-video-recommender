@@ -28,6 +28,11 @@ import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import axios from "axios";
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const columns = [
   { field: 'userId', headerName: '用户ID', width: 100 },
@@ -118,6 +123,120 @@ function UserManagement(props){
 
     const [userList, setUserList]=React.useState();//用户列表
     const [isLoading, setIsLoading] = React.useState(true);//由于数据加载慢，则在axios的finally里判断
+
+    /**
+     * 用户信息
+     */
+    const [userId, setUserId]=React.useState(0)
+    const [userAvatar,setUserAvatar]=React.useState('') //头像地址
+    const [username, setUsername]=React.useState('')
+    const [email, setEmail]=React.useState('')
+    const [password, setPassword]=React.useState('')
+    const [deleted, setDeleted]=React.useState(0)
+
+     /**
+     * 控制更新按钮
+     */
+     const [update, setUpdate]=React.useState(false)
+
+     /**
+     * 选定的行
+     */
+     const [selectedRows, setSelectedRows] = React.useState([]);
+
+     const handleSelectionModelChange = (newSelection) => {
+       setSelectedRows(newSelection);
+     };
+
+     /**
+     * 删除账户
+     */
+    const handleDelete = () => {
+      console.log(selectedRows)
+      if (selectedRows.length==0){
+        alert("请选中要注销的账户");
+        return;
+      }
+      selectedRows.forEach(i=>{
+        console.log(i)
+        axios.delete(`http://localhost:8088/user/logic?userId=${i}`).
+        then((response) => {
+          console.log(response.data);
+        });
+      })
+      window.location.reload(); //页面刷新
+    };
+
+    /**
+     * 恢复删除的账户
+     */
+    const handleRecover=()=>{
+      console.log(selectedRows)
+      if (selectedRows.length==0){
+        alert("请选中要恢复的账户");
+        return;
+      }
+      selectedRows.forEach(i=>{
+        console.log(i)
+        axios.delete(`http://localhost:8088/user/recover?userId=${i}`).
+        then((response) => {
+          console.log(response.data);
+        });
+      })
+      window.location.reload(); //页面刷新
+    }
+
+    //点击更新按钮打开模态框
+    const handleClickUpdate=()=>{
+      //根据选中的row获得对应的信息
+      if (selectedRows.length!=1){
+        alert("每次请选择一条数据更新")
+        return;
+      }
+      console.log("选中的row",selectedRows[0])
+      //调用API根据adminId获取数据
+      axios.get(`http://localhost:8088/user/profile?userId=${selectedRows[0]}`).
+        then((response) => {
+          if (response.data.code==0){
+            setUserId(response.data.data.userId)
+            setUsername(response.data.data.username)
+            setEmail(response.data.data.email)
+            setPassword(response.data.data.password)
+            setDeleted(response.data.data.deleted)
+            setUserAvatar(response.data.data.avatar)
+          }
+          else{
+            //code为-1
+            console.log("没有获取到这个用户")
+          }})
+      setUpdate(true)
+    }
+
+     //关闭更新模态框
+     const handleCloseUpdate=()=>{
+      setUpdate(false)
+    }
+
+     //更新表单提交
+     const handleSubmitUpdate=(event)=>{
+      event.preventDefault();
+      const data = new FormData();
+      data.append("userId",userId)
+      data.append("username",username)
+      data.append("email",email)
+      data.append("password",password)
+      data.append("avatar",userAvatar)
+      data.append("deleted",deleted)
+
+      axios.put("http://localhost:8088/user/profile",data).
+      then((response) => {
+        console.log(response.data);
+    });
+      //关闭模态框
+      setUpdate(false);
+      window.location.reload(); //页面刷新
+    }
+
     
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -356,9 +475,58 @@ function UserManagement(props){
             
       <div style={{ height: 550, width: '100%' }}>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" color="success">恢复账户</Button>
-          <Button variant="contained" color="error">注销账户</Button>
-          <Button variant="contained" color="secondary">更新</Button>
+          <Button variant="contained" color="success" onClick={handleRecover}>恢复账户</Button>
+          <Button variant="contained" color="error" onClick={handleDelete}>注销账户</Button>
+          <Button variant="contained" color="secondary" onClick={handleClickUpdate}>更新</Button>
+          <Dialog open={update} onClose={handleCloseUpdate}>
+             <form onSubmit={handleSubmitUpdate}>
+             <DialogTitle>更新用户信息</DialogTitle>
+              <DialogContent>
+              <TextField
+                margin="dense"
+                id="userId-update"
+                label="用户ID"
+                fullWidth
+                variant="standard"
+                value={userId}
+                readOnly
+                />
+              <TextField
+                autoFocus
+                margin="dense"
+                id="email-update"
+                label="邮箱地址"
+                type="email"
+                fullWidth
+                variant="standard"
+                value={email}
+                onChange={(event)=>setEmail(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="username-update"
+                label="用户名"
+                fullWidth
+                variant="standard"
+                value={username}
+                onChange={(event)=>setUsername(event.target.value)}
+                />
+                <TextField
+                margin="dense"
+                id="password-update"
+                label="密码"
+                fullWidth
+                variant="standard"
+                value={password}
+                onChange={(event)=>setPassword(event.target.value)}
+                />
+            </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseUpdate}>取消</Button>
+                    <Button type='submit'>提交</Button>
+                </DialogActions>
+             </form>
+          </Dialog>
         </Stack>
         <br/>
       <DataGrid
@@ -371,6 +539,7 @@ function UserManagement(props){
         },}}
           pageSizeOptions={[20, 50, 100]}
           checkboxSelection
+          onRowSelectionModelChange={handleSelectionModelChange}
           />
   </div>
     )}

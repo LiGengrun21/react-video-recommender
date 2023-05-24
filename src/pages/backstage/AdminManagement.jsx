@@ -32,9 +32,7 @@ import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Alert } from '@mui/material';
 
 const columns = [
   { field: 'adminId', headerName: '管理员ID', width: 150 },
@@ -147,9 +145,6 @@ function AdminManagement(props){
     const [updateDeleted, setUpdateDeleted]=React.useState(0)//不显示
     const [updatePermission, setUpdatePermission]=React.useState(0)//不显示
 
-    // //用于更新按钮，判断是否选择row的条数正确，因为每次只能更新一条
-    // const [updateSelect, setUpdateSelect]=React.useState(true)
-
     /**
      * 控制添加按钮
      */
@@ -175,6 +170,10 @@ function AdminManagement(props){
      */
     const handleDelete = () => {
       console.log(selectedRows)
+      if (selectedRows.length==0){
+        alert("请选中要注销的账户");
+        return;
+      }
       // 在这里执行删除操作，例如与后端通信并从数据库中删除选定的行
       // 删除成功后，更新用户界面，可以重新加载数据或从 adminList 中移除被删除的行
       selectedRows.forEach(i=>{
@@ -192,6 +191,10 @@ function AdminManagement(props){
      */
     const handleRecover=()=>{
       console.log(selectedRows)
+      if (selectedRows.length==0){
+        alert("请选中要恢复的账户");
+        return;
+      }
       selectedRows.forEach(i=>{
         console.log(i)
         axios.delete(`http://localhost:8088/admin/recover?adminId=${i}`).
