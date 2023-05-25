@@ -3,8 +3,10 @@ import Rating from '@mui/material/Rating';
 
 export default function MyScore(props){
   
+  //电影平均分
   const [movieScore, setMovieScore] = React.useState(Math.round(props.movieScore*10)/10);
-  const [userScore, setUserScore] = React.useState(0);
+  //用户评分
+  const [userScore, setUserScore] = React.useState(props.userScore);
 
   React.useEffect(()=>{
     if(userScore!=0)

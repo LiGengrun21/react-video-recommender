@@ -34,6 +34,9 @@ function VideoDetail(){
 
     //电影平均分
     const [movieScore, setMovieScore]=React.useState()
+
+    //用户评分
+    const [userScore, setUserScore]=React.useState()
     
     React.useEffect(() => {
 
@@ -86,7 +89,7 @@ function VideoDetail(){
         });
 
         /**
-        * 根据userId和movieId获取平均分
+        * 根据movieId获取平均分
         */
         axios.get(`http://localhost:8088/movie/rating?movieId=${movieId}`).
         then((response) => {
@@ -98,7 +101,20 @@ function VideoDetail(){
             //code为-1
             setMovieScore()
           }});
-
+        
+        /**
+         * 根据movieId和userId获取用户评分
+         */
+        axios.get(`http://localhost:8088/movie/user/rating?userId=${userId}&movieId=${movieId}`).
+        then((response) => {
+          console.log(response.data);
+          if (response.data.code==0){
+            setUserScore(response.data.data.score)
+          }
+          else{
+            //code为-1
+            setUserScore()
+          }});
        
        },[videoUrl]);
 
@@ -116,7 +132,7 @@ function VideoDetail(){
                         <source src={videoUrl}/>
                     </video>
                 )}
-                {movieScore && <MyScore movieScore={movieScore}/>}
+                {movieScore && <MyScore movieScore={movieScore} userScore={userScore}/>}
                 
                 </Grid>
                 <Grid item xs={5.5}>
