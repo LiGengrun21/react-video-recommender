@@ -180,7 +180,7 @@ function AdminProfile(props){
         /**
          * 调用修改管理员信息的API
          */
-        axios.put("http://localhost:8088/admin/adminId",data).
+        axios.put("http://localhost:8088/admin",data).
         then((response) => {
           console.log(response.data);
           if (response.data.code==0){

@@ -500,15 +500,6 @@ function VideoManagement(props){
              <form onSubmit={handleSubmitUpdate}>
              <DialogTitle>更新电影信息</DialogTitle>
               <DialogContent>
-              {/* <TextField
-                margin="dense"
-                id="movieId-update"
-                label="电影ID"
-                fullWidth
-                variant="standard"
-                value={movieId}
-                readOnly
-                /> */}
               <TextField
                 autoFocus
                 margin="dense"
@@ -594,8 +585,19 @@ function VideoManagement(props){
                 onChange={(event)=>setDescription(event.target.value)}
                 />
                 <br/><br/>
-                <input accept="image/*" id="picture-upload" type="file" onChange={handleChangePicture}/>
-                <input accept="video/*" id="video-upload" type="file" onChange={handleChangeVideo}/>
+                <strong>上传图片：</strong>
+                <label htmlFor="picture-input">
+                  <img src={picture}  style={{ width: '500px'}}></img>
+                  <input accept="image/*" id="picture-upload" type="file" onChange={handleChangePicture}/>
+                </label>
+               
+                <br/><br/>
+                <strong>上传视频：</strong>
+                <label htmlFor="video-input">
+                  <video src={video} style={{ width: '500px'}}></video>
+                  <input accept="video/*" id="video-upload" type="file" onChange={handleChangeVideo}/>
+                </label>
+               
 
             </DialogContent>
                 <DialogActions>

@@ -45,9 +45,9 @@ function Profile(){
     const data = new FormData(event.currentTarget);
     data.append("userId",userId)
     data.append("deleted",deleted)
-    data.append("userAvatar",userAvatar)
+    data.append("avatar",userAvatar)
 
-    console.log(data.get("email"),data.get("password"),data.get("username"));
+    console.log(data.get("email"),data.get("password"),data.get("username"),data.get("avatar"));
  
 
     //判断新邮箱是否符格式
@@ -72,6 +72,7 @@ function Profile(){
        setEmail(response.data.data.email)
        setPassword(response.data.data.password)
        setDeleted(response.data.data.deleted)
+       setUserAvatar(response.data.data.avatar)
       }
       else{
         //code为-1

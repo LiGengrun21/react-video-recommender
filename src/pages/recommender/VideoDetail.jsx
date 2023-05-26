@@ -121,7 +121,7 @@ function VideoDetail(){
 
     return(
         <div>
-            视频详情页 {movieId} {userId} {videoUrl}
+            {/* 视频详情页 {movieId} {userId} {videoUrl} */}
 
             <PrimarySearchAppBar userAvatar={userAvatar} username={username} userId={userId}/>
             <Grid container spacing={2}>
@@ -132,8 +132,11 @@ function VideoDetail(){
                         <source src={videoUrl}/>
                     </video>
                 )}
-                {movieScore && <MyScore movieScore={movieScore} userScore={userScore}/>}
-                
+                <div>
+                  {/* <strong>平均评分</strong> */}
+                  {movieScore && <MyScore movieScore={movieScore} userScore={userScore} userId={userId} movieId={movieId}/>}
+                </div>
+              
                 </Grid>
                 <Grid item xs={5.5}>
                     <br/>

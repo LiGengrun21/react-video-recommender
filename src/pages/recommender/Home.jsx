@@ -93,16 +93,16 @@ function Home(){
           <Paper style={{ backgroundColor: '#000000' }}>
           <PrimarySearchAppBar userAvatar={userAvatar} username={username} userId={userId}/>
           <Box height={"50px"}></Box>
-          <Grid container >
+          <Grid container spacing={5}>
               <Grid item xs={0.5}></Grid>
               <Grid item xs={11}>
-                <Typography variant="h7" color="primary" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }} style={{ fontWeight: 'bold' }}>
+                <Typography variant="h5" color="primary" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }} style={{ fontWeight: 'bold' }}>
                     个性化推荐影片
                 </Typography><br/>
               </Grid>
               <Grid item xs={0.5}></Grid>
           </Grid>
-            <Grid container>
+            <Grid container spacing={5}>
                 <Grid item xs={0.5}></Grid>
                 <Grid item xs={11}>
                     <MovieList movieData={cfData} userId={userId}/>
@@ -110,33 +110,16 @@ function Home(){
                 <Grid item xs={0.5}></Grid>
             </Grid>
 
-            {/* <Grid container>
+            <Grid container spacing={5}>
               <Grid item xs={0.5}></Grid>
               <Grid item xs={11}>
-                <Typography variant="h7" color="primary" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }} style={{ fontWeight: 'bold' }}>
-                    最近热门的影片
+                <Typography variant="h5" color="primary" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }} style={{ fontWeight: 'bold' }}>
+                    <strong>高分影片</strong>
                 </Typography>
               </Grid>
               <Grid item xs={0.5}></Grid>
           </Grid>
-            <Grid container>
-                <Grid item xs={0.5}></Grid>
-                <Grid item xs={11}>
-                    <MovieList xxx={itemData2}/>
-                </Grid>
-                <Grid item xs={0.5}></Grid>
-            </Grid> */}
-
-            <Grid container>
-              <Grid item xs={0.5}></Grid>
-              <Grid item xs={11}>
-                <Typography variant="h7" color="primary" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }} style={{ fontWeight: 'bold' }}>
-                    高分影片
-                </Typography>
-              </Grid>
-              <Grid item xs={0.5}></Grid>
-          </Grid>
-            <Grid container>
+            <Grid container spacing={5}>
                 <Grid item xs={0.5}></Grid>
                 <Grid item xs={11}>
                     <MovieList movieData={topRatedData} userId={userId}/>
@@ -144,16 +127,16 @@ function Home(){
                 <Grid item xs={0.5}></Grid>
             </Grid>
 
-            <Grid container>
+            <Grid container spacing={5}>
               <Grid item xs={0.5}></Grid>
               <Grid item xs={11}>
-                <Typography variant="h7" color="primary" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }} style={{ fontWeight: 'bold' }}>
+                <Typography variant="h5" color="primary" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }} style={{ fontWeight: 'bold' }}>
                     热门影片
                 </Typography>
               </Grid>
               <Grid item xs={0.5}></Grid>
           </Grid>
-            <Grid container>
+            <Grid container spacing={5}>
                 <Grid item xs={0.5}></Grid>
                 <Grid item xs={11}>
                     <MovieList movieData={mostViewedData} userId={userId}/>
@@ -161,7 +144,7 @@ function Home(){
                 <Grid item xs={0.5}></Grid>
             </Grid>
             {/* <SearchBar/> */}
-            视频系统首页 {userId}
+            {/* 视频系统首页 {userId} */}
           </Paper>
           
         </div>
